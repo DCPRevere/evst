@@ -1,0 +1,91 @@
+* evst
+
+From eventstore.org: 
+#+BEGIN_QUOTE
+"Event Store stores your data as a series of immutable events over time, making it easy to build event-sourced applications"
+#+END_QUOTE
+
+This is a Clojure wrapper for the ~EventStore.JVM~ library. It provides object conversion between EventStore objects and convenient Clojure alternatives, as well as idiomatic functions for writing and reading events to an EventStore instance.
+
+The library is fully spec'd, both objects and functions, with generative testing using ~test.check~.
+
+** Namespaces
+
+This library has four source namespaces:
+
+- ~core~ :: object conversion and connection
+- ~base~ :: EsConnection wrapper
+- ~api~ :: EsConnection wrapper but with a nicer API
+- ~utils~ :: objects to help with Scala objects
+
+*** evst.core
+
+Contains functions for converting to and from the EventStore objects and their Clojure equivalent.
+
+The functions are named ~ClassName->~ to convert from the EventStore object, and ~->ClassName~ for the opposite.
+
+The structure of the Clojure equivalents is documented in the specs, like so for ~UserCredentials~ and its Clojure version ~::evst/credentials~.
+
+#+BEGIN_SRC clojure
+(s/def ::creds/login (s/and string? seq))
+(s/def ::creds/password (s/and string? seq))
+(s/def ::evst/credentials (s/keys :req [::creds/login ::creds/password]))
+#+END_SRC
+
+This defines a map with two required entries, ~::creds/login~ and ~::creds/password~, which both have non-empty strings for values.
+
+The EventStore Scala classes also have specs written in the ~::ext~ namespace, with custom generators that allow for generative testing.
+
+Finally, ~core~ contains the function ~connect~ that returns a collection of EventStore connection objects.
+
+**** Connecting
+
+The ~core/connect~ function can be called with, or without a connection settings param, ~::evst/settings~. Its spec describes all configuration options.
+
+**** Aliases
+
+Namespaced keys are used throughout the project to allow for unambiguous reference to objects and to leverage ~clojure.spec.alpha~.
+
+Clojure lacks a way to alias a namespace if the namespace doesn't exist, hence the creation and aliasing of namespaces at the beginning of files.
+
+#+BEGIN_SRC clojure
+(create-ns 'evst)
+(alias 'evst 'evst)
+#+END_SRC
+
+
+*** evst.base
+
+Simple Clojure wrapper for the methods of the ~EsConnection~ class.
+
+*** evst.api
+
+A wrapper of ~evst.base~ that provides defaults and overrides.
+
+A default settings map is provided by ~evst.api/defaults~, but it needs a connection to be useful.
+
+#+BEGIN_SRC clojure
+(def settings (api/add-connection api/defaults (core/connect))
+#+END_SRC
+
+Or you can override defaults using ~merge-with-defaults~.
+
+#+BEGIN_SRC clojure
+(def settings 
+  (api/add-connection (api/merge-with-defaults {:key :value}) 
+                      (core/connect))
+#+END_SRC
+
+For all functions ~settings~ is the last param unless you wish to override a particular setting. You can do so by adding the key and value as the last params, this can be done for multiple key-value pairs.
+
+#+BEGIN_SRC clojure
+(write-events stream events settings 
+  ::evst/version ::version/any
+  ::evst/master? true)
+#+END_SRC
+
+*** evst.utils
+
+Contains functions that make it easier to deal with Scala objects.
+
+They are for internal use, but are still public.
