@@ -1,11 +1,11 @@
 * evst
 
-From eventstore.org: 
+From [[eventstore.org][eventstore.org]]: 
 #+BEGIN_QUOTE
 "Event Store stores your data as a series of immutable events over time, making it easy to build event-sourced applications"
 #+END_QUOTE
 
-This is a Clojure wrapper for the ~EventStore.JVM~ library. It provides object conversion between EventStore objects and convenient Clojure alternatives, as well as idiomatic functions for writing and reading events to an EventStore instance.
+This is a Clojure wrapper for the ~EventStore.JVM~ library ([[https://github.com/EventStore/EventStore.JVM]]). It provides object conversion between EventStore objects and convenient Clojure alternatives, as well as idiomatic functions for writing and reading events to an EventStore instance.
 
 The library is fully spec'd, both objects and functions, with generative testing using ~test.check~.
 
