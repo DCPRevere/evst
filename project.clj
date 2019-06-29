@@ -4,7 +4,7 @@
   :license {:name "Eclipse Public License"
             :url "http://www.eclipse.org/legal/epl-v10.html"}
 
-  :plugins [[s3-wagon-private "1.3.1"]]
+  :plugins [[s3-wagon-private "1.3.2"]]
 
   :repositories {"private" {:url "s3p://hrwd-mvn-repo/releases/"
                             :username      :env/aws_access_key_id
