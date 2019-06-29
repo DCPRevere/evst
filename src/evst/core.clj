@@ -11,7 +11,8 @@
    [expound.alpha :as exp]
    [clojure.set :as set])
   (:use [clojure.core.match.regex])
-  (:import [scala , Option]
+  (:import [java.util , UUID]
+           [scala , Option]
            [scala.concurrent.duration Duration]
            [scala.collection , JavaConversions]
            [eventstore.j , DeleteStreamBuilder]))
@@ -45,8 +46,7 @@
 (s/fdef ->UserCredentials
   :args (s/alt :default (s/cat)
                :custom ::evst/credentials)
-  :ret ::ext/credentials
-  )
+  :ret ::ext/credentials)
 
 (defn UserCredentials-> [o]
   {::creds/login (.login o)
@@ -1513,3 +1513,35 @@
       ::evst/connection-actor connection-actor
       :eventstore/connection esconn
       ::evst/connection esconn-impl})))
+
+
+
+(defn value-of [e]
+  (if (::evst/event-data e)
+    (value-of (::evst/event-data e))
+    (let [data (::event/data e)]
+      (if (::e.data/value data)
+        (::e.data/value data)
+        data))))
+
+(s/fdef value-of
+  :args (s/or :event (s/cat :event ::evst/event)
+              :event-data (s/cat :event-data ::evst/event-data))
+  :ret ::e.data/value)
+
+(defn type-of [e]
+  (-> e ::evst/event-data ::event/type))
+
+(s/fdef type-of
+  :args (s/cat :event ::evst/event)
+  :ret ::event/type)
+
+(defn event-of
+  ([type] (event-of type (UUID/randomUUID) nil))
+  ([type data] (event-of type (UUID/randomUUID) data))
+  ([type id data] {::event/type type ::event/id id ::event/data data}))
+
+(s/fdef event-of
+  :args (s/or :only-type (s/cat :type ::event/type)
+              :type-and-data (s/cat :type ::event/type :data ::event/data)
+              :with-id (s/cat :type ::event/type :id ::event/id :data ::event/data)))

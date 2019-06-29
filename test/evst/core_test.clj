@@ -276,3 +276,36 @@
 
 (t/deftest ->Settings-test
   (t/is (rt/successful? (check `sut/->Settings (num-tests 100)))))
+
+
+
+(t/deftest value-of-test
+
+  (t/testing "event-data, event/data and event.data/value"
+    (let [event {::evst/event-data {::event/data {::e.data/value :foo}}}
+          expected :foo
+          actual (sut/value-of event)]
+     (t/is (= expected actual))))
+
+  (t/testing "No data/value"
+    (let [event {::evst/event-data {::event/data :foo}}
+          expected :foo
+          actual (sut/value-of event)]
+      (t/is (= expected actual))))
+
+  (t/testing "No event-data"
+    (let [event {::event/data {::e.data/value :foo}}
+          expected :foo
+          actual (sut/value-of event)]
+      (t/is (= expected actual)))))
+
+
+
+(t/deftest event-of-test
+  (t/testing "event-of returns an event object"
+    (let [type "FakeType"
+          id (UUID/randomUUID)
+          data {:foo :bar}
+          expected {::event/type type ::event/id id ::event/data data}
+          actual (sut/event-of type id data)]
+      (t/is (= expected actual)))))
