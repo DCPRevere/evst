@@ -6,8 +6,7 @@
   (:import [scala , Option]
            [scala.collection , JavaConversions]
            [scala.concurrent Await Future]
-           [scala.concurrent.duration Duration]
-           [eventstore.j , DeleteStreamBuilder]))
+           [scala.concurrent.duration Duration]))
 
 ;; Scala lists
 
