@@ -259,7 +259,7 @@
 (create-ns 'evst.event.data.type)
 (alias 'e.d.type 'evst.event.data.type)
 
-(s/def ::e.data/value string?)
+(s/def ::e.data/value any?)
 (s/def ::e.data/type #{::e.d.type/json ::e.d.type/binary})
 (s/def ::event/data (s/keys :req [::e.data/value ::e.data/type]))
 (s/def ::event/metadata ::event/data)
@@ -286,7 +286,7 @@
 (defmulti ->Content ::e.data/type)
 
 (defmethod ->Content ::e.d.type/binary [m]
-  (eventstore.Content/apply (::e.data/value m)))
+  (eventstore.Content/apply (-> m ::e.data/value str)))
 
 (defmethod ->Content ::e.d.type/json [m]
   (.apply (eventstore.Content$Json$.) (json/generate-string (::e.data/value m))))
@@ -308,7 +308,10 @@
 
 (defmethod Content->
   eventstore.ContentType$Json$ [o]
-  {::e.data/value (json/parse-string (.utf8String (.value o)) true)
+  {::e.data/value
+   (let [s (.utf8String (.value o))]
+     (try (json/parse-string s true)
+         (catch com.fasterxml.jackson.core.JsonParseException e s)))
    ::e.data/type ::e.d.type/json})
 
 (defmethod Content->
